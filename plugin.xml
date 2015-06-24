@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        id="nl.x-services.plugins.launchmyapp"
+        id="nl.rob-wouters.plugins.launchmyapp"
         version="3.2.3">
 
   <name>Custom URL scheme</name>
@@ -22,6 +22,8 @@
   <issue>https://github.com/EddyVerbruggen/Custom-URL-scheme/issues</issue>
 
   <preference name="URL_SCHEME" />
+  <preference name="URL_HOST" />
+  <preference name="URL_PATHPREFIX" />
 
   <engines>
     <engine name="cordova" version=">=3.0.0"/>
@@ -61,10 +63,15 @@
 
     <config-file target="AndroidManifest.xml" parent="/*/application/activity">
       <intent-filter>
-        <data android:scheme="$URL_SCHEME"/>
+        <data android:scheme="$URL_SCHEME" android:host="$URL_HOST" android:pathPrefix="$URL_PATHPREFIX" />      
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
+      </intent-filter>
+      <intent-filter>                                                                                                  
+        <data android:scheme="$URL_SCHEME" android:host="$URL_HOST" android:pathPrefix="$URL_PATHPREFIX" />      
+        <action android:name="android.nfc.action.NDEF_DISCOVERED"/>             
+        <category android:name="android.intent.category.DEFAULT" />                                                    
       </intent-filter>
     </config-file>
   </platform>
