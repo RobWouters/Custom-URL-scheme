@@ -40,6 +40,12 @@ This plugin allows you to start your app by calling it with a URL like `mycoolap
 LaunchMyApp is compatible with [Cordova Plugman](https://github.com/apache/cordova-plugman).
 Replace `mycoolapp` by a nice scheme you want to have your app listen to:
 
+Latest release on npm:
+```
+$ cordova plugin add cordova-plugin-customurlscheme --variable URL_SCHEME=mycoolapp
+```
+
+Bleeding edge master version from Github:
 ```
 $ cordova plugin add https://github.com/EddyVerbruggen/LaunchMyApp-PhoneGap-Plugin.git --variable URL_SCHEME=mycoolapp
 ```
@@ -52,6 +58,7 @@ Please manually remove the blank line and whitespace (if any) from `NSMainNibFil
 
 
 ### Manually
+Don't shoot yourself in the foot - use the CLI! That being said, here goes:
 
 #### iOS
 1\. `Copy www/ios/LaunchMyApp.js` to `www/js/plugins/LaunchMyApp.js` and reference it in your `index.html`:
@@ -101,7 +108,7 @@ Please manually remove the blank line and whitespace (if any) from `NSMainNibFil
 
 Using LaunchMyApp with PhoneGap Build requires you to add the following xml to your `config.xml` to use the latest version of this plugin (replace `mycoolapp` by a nice scheme you want to have your app listen to):
 ```xml
-<gap:plugin name="nl.x-services.plugins.launchmyapp">
+<gap:plugin name="cordova-plugin-customurlscheme" source="npm">
   <param name="URL_SCHEME" value="mycoolapp" />
 </gap:plugin>
 ```
@@ -114,7 +121,7 @@ NOTE: When Hydration is enabled at PGB, this plugin may not work.
 In order to be able to restore the plugin settings on `cordova plugin add`, one need to add the following feature into config.xml. Note that if you added the plugin with the `--save` param you will find this in your `config.xml` already, except for the `variable` tag which is likely a `param` tag. [Change that.](https://github.com/EddyVerbruggen/Custom-URL-scheme/issues/76)
 ```xml
   <feature name="Custom URL scheme">
-    <param name="id" value="nl.x-services.plugins.launchmyapp" />
+    <param name="id" value="cordova-plugin-customurlscheme" />
     <param name="url" value="https://github.com/EddyVerbruggen/LaunchMyApp-PhoneGap-Plugin.git" />
     <variable name="URL_SCHEME" value="mycoolapp" /><!-- change as appropriate -->
   </feature>
@@ -160,6 +167,25 @@ function handleOpenURL(url) {
 ```
 A more useful implementation would mean parsing the URL, saving any params to sessionStorage and redirecting the app to the correct page inside your app.
 All this happens before the first page is loaded.
+
+### Meteor
+When running a [meteor](meteor.com) app in the cordova environment, `handleOpenURL` doesn't get called after a cold start, because cordova resets the javascript world during startup and our timer waiting for `handleOpenURL` gets vanished (see [#98](https://github.com/EddyVerbruggen/Custom-URL-scheme/issues/98)). To get the intent by which the app was started in a meteor cordova app you need to ask for it from the meteor side with `getLastIntent` like this.
+```javascript
+Meteor.startup(function() {
+  if (Meteor.isCordova) {
+    window.plugins.launchmyapp.getLastIntent(function(url) {
+      if (intent.indexOf('mycoolapp://' > -1)) {
+        console.log("received url: " + url);
+      } else {
+        return console.log("ignore intent: " + url);
+      }
+    }, function(error) {
+      return console.log("no intent received");
+    });
+    return;
+  }
+});
+```
 
 ## 4. URL Scheme hints
 Please choose a URL_SCHEME which which complies to these restrictions:
